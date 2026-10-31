@@ -16,7 +16,7 @@ def run_all(audio_file="hydrophone_recording.wav"):
     print(f"STARTING ANALYSIS PIPELINE FOR: {audio_file}")
     print("=" * 60)
 
-    # Step 1: MATLAB-equivalent Analysis on Original File
+    # Step 1: Analysis on Original File
     print("\n[1/5] Generating Normalized Amplitude Plot...")
     plot_normalized_amplitude(audio_file=str(input_path), output_folder="analysis_plots")
 

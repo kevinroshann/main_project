@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.signal import butter, sosfiltfilt, spectrogram
 from pathlib import Path
 
-def process_audio_filtering(input_file="hydrophone_recording.wav", output_folder="filtered_audio", low_cut=1500, high_cut=20000, filter_order=4):
+def process_audio_filtering(input_file="hydrophone_recording.wav", output_folder="filtered_audio", low_cut=2000, high_cut=90000, filter_order=4):
     output_path = Path(output_folder)
     output_path.mkdir(exist_ok=True)
 
@@ -30,7 +30,6 @@ def process_audio_filtering(input_file="hydrophone_recording.wav", output_folder
     # Dynamically adjust cutoffs based on Nyquist frequency
     nyquist = fs / 2
     
-    # Cap high cutoff to slightly below Nyquist frequency
     if high_cut >= nyquist:
         high_cut = max(low_cut + 100, nyquist - 100)
         print(f"Notice: HIGH_CUT capped at {high_cut} Hz (Nyquist limit: {nyquist} Hz)")
@@ -65,7 +64,9 @@ def process_audio_filtering(input_file="hydrophone_recording.wav", output_folder
         plt.close()
 
     def plot_spectrogram(signal, title, filename):
-        f, t, Sxx = spectrogram(signal, fs=fs, nperseg=min(1024, len(audio)), noverlap=min(768, len(audio)//2))
+        nperseg = min(1024, len(signal))
+        noverlap = min(768, nperseg // 2)
+        f, t, Sxx = spectrogram(signal, fs=fs, nperseg=nperseg, noverlap=noverlap)
         plt.figure(figsize=(14, 6))
         plt.pcolormesh(t, f / 1000, 10 * np.log10(Sxx + 1e-15), shading="auto")
         plt.xlabel("Time (seconds)")

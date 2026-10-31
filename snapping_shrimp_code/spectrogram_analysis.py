@@ -15,9 +15,9 @@ def plot_spectrogram_analysis(audio_file="hydrophone_recording.wav", output_fold
 
     audio = audio - np.mean(audio)
 
-    window_length = 1024
-    overlap = 768
-    nfft = 2048
+    window_length = min(1024, len(audio))
+    overlap = min(768, window_length // 2)
+    nfft = max(2048, window_length)
 
     f, t, Sxx = spectrogram(
         audio,

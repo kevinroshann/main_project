@@ -3,7 +3,7 @@ import pandas as pd
 import soundfile as sf
 from pathlib import Path
 
-def detect_snapping_events(input_file="filtered_audio/filtered_recording.wav", output_folder="snap_events", frame_ms=1.0, hop_ms=0.25, threshold_mad=6.0, min_event_ms=0.25, merge_gap_ms=2.0, pre_event_ms=2.0, post_event_ms=5.0):
+def detect_snapping_events(input_file="filtered_audio/filtered_recording.wav", output_folder="snap_events", frame_ms=0.5, hop_ms=0.1, threshold_mad=6.0, min_event_ms=0.25, merge_gap_ms=2.0, pre_event_ms=2.0, post_event_ms=5.0):
     output_path = Path(output_folder)
     output_path.mkdir(exist_ok=True)
 
