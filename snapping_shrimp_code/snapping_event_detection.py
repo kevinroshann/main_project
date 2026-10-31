@@ -3,7 +3,7 @@ import pandas as pd
 import soundfile as sf
 from pathlib import Path
 
-def detect_snapping_events(input_file="filtered_audio/filtered_recording.wav", output_folder="snap_events", frame_ms=0.5, hop_ms=0.1, threshold_mad=6.0, min_event_ms=0.25, merge_gap_ms=2.0, pre_event_ms=2.0, post_event_ms=5.0):
+def detect_snapping_events(input_file="filtered_audio/filtered_recording.wav", output_folder="snap_events", file_prefix="snap", frame_ms=0.5, hop_ms=0.1, threshold_mad=6.0, min_event_ms=0.25, merge_gap_ms=2.0, pre_event_ms=2.0, post_event_ms=5.0):
     output_path = Path(output_folder)
     output_path.mkdir(exist_ok=True)
 
@@ -74,7 +74,8 @@ def detect_snapping_events(input_file="filtered_audio/filtered_recording.wav", o
         frequencies = np.fft.rfftfreq(len(event), d=1/fs)
         peak_frequency = frequencies[np.argmax(spectrum)]
 
-        filename = output_path / f"candidate_snap_{number:04d}.wav"
+        # Unique file naming based on source file prefix
+        filename = output_path / f"{file_prefix}_snap_{number:04d}.wav"
         sf.write(filename, event, fs)
 
         metadata.append({
@@ -88,11 +89,11 @@ def detect_snapping_events(input_file="filtered_audio/filtered_recording.wav", o
             "filename": str(filename),
         })
 
-    # Save CSV
+    # Save metadata CSV for current file
     df = pd.DataFrame(metadata)
-    df.to_csv(output_path / "event_metadata.csv", index=False)
-    print("Candidate events detected:", len(df))
-    print("Metadata saved successfully.")
+    df.to_csv(output_path / f"{file_prefix}_metadata.csv", index=False)
+    print(f"Candidate events detected for {file_prefix}: {len(df)}")
+    return len(df)
 
 if __name__ == "__main__":
     detect_snapping_events()
