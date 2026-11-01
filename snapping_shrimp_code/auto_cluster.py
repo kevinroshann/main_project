@@ -29,7 +29,8 @@ def extract_clip_features(wav_path):
     spectral_rolloff = freqs[min(rolloff_idx, len(freqs) - 1)]
 
     return {
-        "filename": os.path.basename(wav_path),
+        "filename": str(wav_path),
+        "clip_name": os.path.basename(wav_path),
         "peak_amplitude": peak_amp,
         "rms_amplitude": rms_amp,
         "zero_crossing_rate": zcr,
@@ -40,7 +41,7 @@ def extract_clip_features(wav_path):
         "spectral_kurtosis": kurtosis(fft_vals),
     }
 
-def run_unsupervised_clustering(snap_folder="snap_events", num_clusters=3, output_csv="clustered_events.csv"):
+def run_unsupervised_clustering(snap_folder="snap_events", metadata_csv="all_detected_events.csv", num_clusters=3, output_csv="clustered_events.csv"):
     wav_files = glob.glob(os.path.join(snap_folder, "*.wav"))
     if not wav_files:
         print(f"No WAV files found in '{snap_folder}'. Please check path.")
@@ -56,6 +57,18 @@ def run_unsupervised_clustering(snap_folder="snap_events", num_clusters=3, outpu
             print(f"Error reading {wav_file}: {e}")
 
     df = pd.DataFrame(features_list)
+
+    # Merge start_time_s and source_file from all_detected_events.csv
+    if os.path.exists(metadata_csv):
+        meta_df = pd.read_csv(metadata_csv)
+        if "filename" in meta_df.columns and "start_time_s" in meta_df.columns:
+            df = df.merge(meta_df[["filename", "start_time_s", "source_file"]], on="filename", how="left")
+        elif "start_time_s" in meta_df.columns:
+            # Fallback join by order if filename strings vary
+            df["start_time_s"] = meta_df["start_time_s"].values[:len(df)]
+
+    if "start_time_s" not in df.columns:
+        df["start_time_s"] = np.arange(len(df)) * 0.1  # Fallback dummy timestamp
 
     feature_cols = [
         "peak_amplitude", "rms_amplitude", "zero_crossing_rate",
